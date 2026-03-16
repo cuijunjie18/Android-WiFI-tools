@@ -3,31 +3,43 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="20dp"
-    android:layout_marginTop="100dp">
+    android:padding="20dp">
 
     <TextView
-        android:layout_marginTop="100dp"
         android:id="@+id/statusText"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
         android:text="状态：等待操作"
         android:textSize="16sp"
         android:fontFamily="monospace"
-        android:scrollbars="vertical"/>
+        android:layout_marginTop="200dp"/>
 
     <Button
         android:id="@+id/btnDiscover"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="1. 扫描设备"
+        android:text="扫描设备"
         android:layout_marginTop="10dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="发现设备："
+        android:textSize="14sp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="5dp"/>
+
+    <ListView
+        android:id="@+id/deviceListView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="10dp"/>
 
     <Button
         android:id="@+id/btnConnect"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="2. 连接设备"
+        android:text="连接选中设备"
         android:layout_marginTop="10dp"/>
 </LinearLayout>

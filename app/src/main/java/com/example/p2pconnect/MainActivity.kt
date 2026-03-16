@@ -7,6 +7,8 @@ import android.net.wifi.p2p.WifiP2pDevice
 import android.net.wifi.p2p.WifiP2pInfo
 import android.os.Build
 import android.os.Bundle
+import android.widget.ArrayAdapter
+import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -24,7 +26,10 @@ class MainActivity : AppCompatActivity(), WifiDirectManager.ConnectionListener {
 
   private lateinit var binding: ActivityMainBinding
   private lateinit var wifiDirectManager: WifiDirectManager
-  private var targetDevice: WifiP2pDevice? = null
+  private lateinit var deviceListView: ListView
+  private val deviceList = mutableListOf<WifiP2pDevice>()
+  private lateinit var deviceAdapter: ArrayAdapter<String>
+  private var selectedDevice: WifiP2pDevice? = null
 
   // 权限列表
   private val requiredPermissions: Array<String>
@@ -44,22 +49,41 @@ class MainActivity : AppCompatActivity(), WifiDirectManager.ConnectionListener {
     binding = ActivityMainBinding.inflate(layoutInflater)
     setContentView(binding.root)
 
+    // 初始化设备列表
+    deviceListView = binding.deviceListView
+    deviceAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_single_choice, mutableListOf<String>())
+    deviceListView.adapter = deviceAdapter
+    deviceListView.choiceMode = ListView.CHOICE_MODE_SINGLE
+
     if (checkPermissions()) {
       initWifiDirect()
     }
 
     binding.btnDiscover.setOnClickListener {
+      clearStatus()
       if (checkPermissions()) {
+        clearDeviceList()
         appendStatus("正在扫描设备...")
         wifiDirectManager.discoverPeers()
       }
     }
 
     binding.btnConnect.setOnClickListener {
-      targetDevice?.let { device ->
-        appendStatus("正在连接 ${device.deviceName}...")
-        wifiDirectManager.connectToDevice(device)
-      } ?: Toast.makeText(this, "未发现设备", Toast.LENGTH_SHORT).show()
+      val selectedPosition = deviceListView.checkedItemPosition
+      if (selectedPosition != ListView.INVALID_POSITION && selectedPosition < deviceList.size) {
+        selectedDevice = deviceList[selectedPosition]
+        appendStatus("正在连接 ${selectedDevice!!.deviceName}...")
+        wifiDirectManager.connectToDevice(selectedDevice!!)
+      } else {
+        Toast.makeText(this, "请先选择一个设备", Toast.LENGTH_SHORT).show()
+      }
+    }
+
+    // 设备列表点击事件
+    deviceListView.setOnItemClickListener { _, _, position, _ ->
+      selectedDevice = deviceList[position]
+      clearStatus()
+      appendStatus("已选择设备：${selectedDevice!!.deviceName}")
     }
   }
 
@@ -91,11 +115,15 @@ class MainActivity : AppCompatActivity(), WifiDirectManager.ConnectionListener {
 
   // 回调：发现设备
   override fun onDeviceFound(device: WifiP2pDevice) {
-    // 这里可以添加过滤逻辑，比如只连接特定名称的设备
-    targetDevice = device
-    runOnUiThread {
-      appendStatus("\n发现设备：${device.deviceName}")
-      Toast.makeText(this, "发现 Linux 设备", Toast.LENGTH_SHORT).show()
+    // 避免重复添加相同设备
+    if (deviceList.none { it.deviceAddress == device.deviceAddress }) {
+      clearStatus()
+      deviceList.add(device)
+      runOnUiThread {
+        deviceAdapter.add("${device.deviceName} (${device.deviceAddress})")
+        deviceAdapter.notifyDataSetChanged()
+        appendStatus("发现设备：${device.deviceName}")
+      }
     }
   }
 
@@ -111,6 +139,16 @@ class MainActivity : AppCompatActivity(), WifiDirectManager.ConnectionListener {
 
   override fun onConnectionFailed() {
     runOnUiThread { appendStatus("\n连接失败") }
+  }
+
+  // 清空设备列表
+  private fun clearDeviceList() {
+    deviceList.clear()
+    runOnUiThread {
+      deviceAdapter.clear()
+      deviceAdapter.notifyDataSetChanged()
+      selectedDevice = null
+    }
   }
 
   // 协程处理网络 IO
@@ -148,6 +186,10 @@ class MainActivity : AppCompatActivity(), WifiDirectManager.ConnectionListener {
 
   private fun appendStatus(text: String) {
     binding.statusText.append(text)
+  }
+
+  private fun clearStatus() {
+    binding.statusText.text = ""
   }
 
   override fun onDestroy() {
