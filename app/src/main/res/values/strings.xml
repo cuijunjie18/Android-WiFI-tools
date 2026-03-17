@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GroupConnect</string>
+    <string name="network_name_hint">请输入Direct热点的网络名称</string>
+    <string name="passphrase_hint">请输入Direct热点的密码</string>
+    <string name="connect_button_text">连接Direct热点</string>
+    <string name="status_label">状态：</string>
+    <string name="initial_status">等待权限授权...</string>
+    <string name="permission_required">需要权限才能使用WiFi Direct功能</string>
+    <string name="input_required">请输入网络名称和密码</string>
+    <string name="connection_success">连接请求发送成功</string>
+    <string name="connection_failed">连接失败</string>
+    <string name="config_failed">配置创建失败</string>
+    <string name="wifi_direct_enabled">WiFi Direct已启用</string>
+    <string name="wifi_direct_disabled">WiFi Direct未启用</string>
+    <string name="connecting">正在连接...</string>
+    <string name="connection_request_sent">连接请求已发送，等待响应...</string>
+    <string name="discovering_peers">发现对等设备</string>
+    <string name="instruction_title">使用说明：</string>
+    <string name="instruction_content">1. 确保设备支持WiFi Direct功能\n2. 输入Direct热点的网络名称和密码\n3. 点击连接按钮建立连接\n4. 连接状态会实时显示在下方</string>
+</resources>

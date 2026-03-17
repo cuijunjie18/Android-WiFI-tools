@@ -1,0 +1,3 @@
+# 需求文档
+
+你需要完成一个Android客户端的编写，核心功能是：通过networkname和passphrase连接上Direct热点，其中相关参考代码在readme.md中给出，但那段代码有很多依赖问题，不能移植，你需要用自己的方式去实现这个demo客户端
