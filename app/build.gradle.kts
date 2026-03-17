@@ -4,12 +4,12 @@ plugins {
 
 android {
   namespace = "com.example.groupconnect"
-  compileSdk = 33
+  compileSdk = 36
 
   defaultConfig {
     applicationId = "com.example.groupconnect"
     minSdk = 24
-    targetSdk = 33
+    targetSdk = 32
     versionCode = 1
     versionName = "1.0"
 

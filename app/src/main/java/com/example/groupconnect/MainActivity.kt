@@ -1,11 +1,13 @@
 package com.example.groupconnect
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.wifi.WpsInfo
 import android.net.wifi.p2p.WifiP2pConfig
 import android.net.wifi.p2p.WifiP2pDevice
 import android.net.wifi.p2p.WifiP2pManager
@@ -16,6 +18,7 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -80,6 +83,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.NEARBY_WIFI_DEVICES])
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -87,7 +91,8 @@ class MainActivity : AppCompatActivity() {
         initializeViews()
         checkPermissions()
     }
-    
+
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.NEARBY_WIFI_DEVICES])
     private fun initializeViews() {
         networkNameEditText = findViewById(R.id.networkNameEditText)
         passphraseEditText = findViewById(R.id.passphraseEditText)
@@ -132,6 +137,8 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(receiver, intentFilter)
     }
     
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.NEARBY_WIFI_DEVICES])
+    @SuppressLint("BlockedPrivateApi")
     private fun connectToGroup() {
         val networkName = networkNameEditText.text.toString().trim()
         val passphrase = passphraseEditText.text.toString().trim()
@@ -147,7 +154,7 @@ class MainActivity : AppCompatActivity() {
         // 创建WiFi Direct配置
         val config = WifiP2pConfig().apply {
             deviceAddress = "02:00:00:00:00:00" // 使用默认地址
-            wps.setup = WifiP2pConfig.WPS_PBC // 使用PBC方式
+            wps.setup = WpsInfo.KEYPAD
             
             // 使用反射设置网络名称和密码（因为API限制）
             try {
@@ -185,6 +192,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
     
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.NEARBY_WIFI_DEVICES])
     override fun onResume() {
         super.onResume()
         if (::wifiP2pManager.isInitialized) {
