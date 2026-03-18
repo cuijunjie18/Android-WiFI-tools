@@ -15,6 +15,7 @@ import android.net.wifi.p2p.WifiP2pManager
 import android.net.wifi.p2p.WifiP2pManager.Channel
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -27,9 +28,14 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
-    
+    companion object {
+        const val TAG = "CJJ_debug"
+    }
+
     private lateinit var wifiP2pManager: WifiP2pManager
     private lateinit var channel: Channel
+
+    private var broadcastReceiver: WiFiDirectBroadcastReceiver? = null
     private lateinit var networkNameEditText: EditText
     private lateinit var passphraseEditText: EditText
     private lateinit var connectButton: Button
@@ -42,47 +48,6 @@ class MainActivity : AppCompatActivity() {
             initializeWifiP2p()
         } else {
             Toast.makeText(this, "需要权限才能使用WiFi Direct功能", Toast.LENGTH_LONG).show()
-        }
-    }
-    
-    private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.action) {
-                WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION -> {
-                    val state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1)
-                    when (state) {
-                        WifiP2pManager.WIFI_P2P_STATE_ENABLED -> {
-                            statusTextView.text = "WiFi Direct已启用"
-                            connectButton.isEnabled = true
-                        }
-                        else -> {
-                            statusTextView.text = "WiFi Direct未启用"
-                            connectButton.isEnabled = false
-                        }
-                    }
-                }
-                WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION -> {
-                    // 对等设备列表发生变化
-                    if (ActivityCompat.checkSelfPermission(
-                            this@MainActivity,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ) != PackageManager.PERMISSION_GRANTED
-                    ) {
-                        return
-                    }
-                    wifiP2pManager.requestPeers(channel) { peers ->
-                        val peerList = peers?.deviceList ?: emptyList()
-                        statusTextView.text = "发现 ${peerList.size} 个设备"
-                    }
-                }
-                WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION -> {
-                    // 连接状态发生变化
-                    statusTextView.text = "连接状态已改变"
-                }
-                WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION -> {
-                    // 本设备信息发生变化
-                }
-            }
         }
     }
     
@@ -107,6 +72,7 @@ class MainActivity : AppCompatActivity() {
         connectButton.setOnClickListener {
             connectToGroup()
         }
+        connectButton.isEnabled = true
     }
     
     private fun checkPermissions() {
@@ -138,8 +104,8 @@ class MainActivity : AppCompatActivity() {
             addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
             addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
         }
-        
-        registerReceiver(receiver, intentFilter)
+        broadcastReceiver = WiFiDirectBroadcastReceiver(wifiP2pManager, channel)
+        registerReceiver(broadcastReceiver, intentFilter)
     }
     
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -156,29 +122,8 @@ class MainActivity : AppCompatActivity() {
         
         statusTextView.text = "正在连接..."
         connectButton.isEnabled = false
-        
-//        // 创建WiFi Direct配置
-//        val config = WifiP2pConfig().apply {
-//            deviceAddress = "02:00:00:00:00:00" // 使用默认地址
-//            wps.setup = WpsInfo.KEYPAD
-//
-//            // 使用反射设置网络名称和密码（因为API限制）
-//            try {
-//                val networkNameField = javaClass.getDeclaredField("networkName")
-//                networkNameField.isAccessible = true
-//                networkNameField.set(this, networkName)
-//
-//                val passphraseField = javaClass.getDeclaredField("passphrase")
-//                passphraseField.isAccessible = true
-//                passphraseField.set(this, passphrase)
-//            } catch (e: Exception) {
-//                Toast.makeText(this@MainActivity, "配置创建失败: ${e.message}", Toast.LENGTH_LONG).show()
-//                statusTextView.text = "配置失败"
-//                connectButton.isEnabled = true
-//                return
-//            }
-//        }
-        val deviceAddress: MacAddress = MacAddress.fromString("F6:CE:23:C9:32:95")
+
+        val deviceAddress: MacAddress = MacAddress.fromString("f4:ce:23:c9:32:96")
         val config = WifiP2pConfig.Builder()
             .setDeviceAddress(deviceAddress)
             .setNetworkName(networkName)
@@ -188,6 +133,7 @@ class MainActivity : AppCompatActivity() {
         // 发起连接
         wifiP2pManager.connect(channel, config, object : WifiP2pManager.ActionListener {
             override fun onSuccess() {
+                Log.d(TAG, "连接请求已发送")
                 runOnUiThread {
                     statusTextView.text = "连接请求已发送，等待响应..."
                     Toast.makeText(this@MainActivity, "连接请求发送成功", Toast.LENGTH_SHORT).show()
@@ -202,37 +148,19 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
-    }
-    
-    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.NEARBY_WIFI_DEVICES])
-    override fun onResume() {
-        super.onResume()
-        if (::wifiP2pManager.isInitialized) {
-            wifiP2pManager.discoverPeers(channel, object : WifiP2pManager.ActionListener {
-                override fun onSuccess() {
-                    // 发现对等设备成功
-                }
-                
-                override fun onFailure(reason: Int) {
-                    // 发现对等设备失败
-                }
-            })
+
+        wifiP2pManager.requestConnectionInfo(channel) { info ->
+            if (info.groupFormed) {
+                Log.d(TAG, "已连接到群组，自己是${if (info.isGroupOwner) "群主" else "客户端"}")
+                // 可进一步获取群组名称、密码等（通过 requestGroupInfo）
+            } else {
+                Log.d(TAG, "未连接到任何群组")
+            }
         }
     }
-    
-    override fun onPause() {
-        super.onPause()
-        if (::wifiP2pManager.isInitialized) {
-            wifiP2pManager.stopPeerDiscovery(channel, null)
-        }
-    }
-    
+
     override fun onDestroy() {
         super.onDestroy()
-        try {
-            unregisterReceiver(receiver)
-        } catch (e: Exception) {
-            // 忽略未注册的异常
-        }
+        unregisterReceiver(broadcastReceiver)
     }
 }
