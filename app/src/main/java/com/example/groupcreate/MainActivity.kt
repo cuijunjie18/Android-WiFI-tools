@@ -51,7 +51,6 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
     initController()
-    initBroadcastReceiver()
     checkPermissions()
   }
 
@@ -68,10 +67,8 @@ class MainActivity : AppCompatActivity() {
         addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION)
         addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
         addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
-//        addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
-//        addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)
       }
-      broadcastReceiver = WiFiDirectBroadcastReceiver()
+      broadcastReceiver = WiFiDirectBroadcastReceiver(wifiP2pManager, channel)
       registerReceiver(broadcastReceiver, intentFilter)
   }
 
@@ -115,7 +112,7 @@ class MainActivity : AppCompatActivity() {
       }
 
       override fun onFailure(reason: Int) {
-        Log.e(TAG, "create Group fail")
+        Log.e(TAG, "create Group fail: error code: $reason")
         Toast.makeText(this@MainActivity, "创建群组失败", Toast.LENGTH_SHORT).show()
       }
     }
@@ -125,27 +122,28 @@ class MainActivity : AppCompatActivity() {
       .setPassphrase("1234567890")
       .build()
 
+    // 移除旧群组
+    removeGroup()
     wifiP2pManager.createGroup(channel, config, listener)
     Log.d(TAG, "create Group done")
+  }
+
+  @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.NEARBY_WIFI_DEVICES])
+  private fun removeGroup() {
+    wifiP2pManager.requestGroupInfo(channel) { group ->
+      if (group != null) {
+        Log.d(TAG, "已有群组存在: ${group.networkName}, 正在移除...")
+        wifiP2pManager.removeGroup(channel, object : WifiP2pManager.ActionListener {
+          override fun onSuccess() { Log.d(TAG, "移除旧群组成功") }
+          override fun onFailure(reason: Int) { Log.e(TAG, "移除旧群组失败") }
+        })
+      }
+    }
   }
 
   override fun onDestroy() {
     super.onDestroy()
     unregisterReceiver(broadcastReceiver)
+    removeGroup()
   }
-
-//  override fun onRequestPermissionsResult(requestCode: Int,
-//                                          permissions: Array<String>, grantResults: IntArray) {
-//    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-//    when (requestCode) {
-//      1 -> {
-//        if (grantResults.isNotEmpty() &&
-//          grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//        } else {
-//          Toast.makeText(this, "You denied the permission",
-//            Toast.LENGTH_SHORT).show()
-//        }
-//      }
-//    }
-//  }
 }
