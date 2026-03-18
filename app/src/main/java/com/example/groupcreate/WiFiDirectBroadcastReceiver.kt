@@ -43,7 +43,7 @@ class WiFiDirectBroadcastReceiver(val wifiP2pManager: WifiP2pManager, val channe
         Log.d(TAG, "WiFi Direct连接状态已变化")
         wifiP2pManager.requestGroupInfo(channel) { group ->
           if (group != null) {
-            Log.d(MainActivity.Companion.TAG, "已有群组存在: ${group.networkName}")
+            Log.d(TAG, "已有群组存在: ${group.networkName}")
           }
         }
       }
