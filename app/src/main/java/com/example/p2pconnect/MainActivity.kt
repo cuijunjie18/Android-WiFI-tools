@@ -31,6 +31,8 @@ class MainActivity : AppCompatActivity(), WifiDirectManager.ConnectionListener {
   private lateinit var deviceAdapter: ArrayAdapter<String>
   private var selectedDevice: WifiP2pDevice? = null
 
+  private var connectTryCount = 0
+
   // 权限列表
   private val requiredPermissions: Array<String>
     get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -69,6 +71,7 @@ class MainActivity : AppCompatActivity(), WifiDirectManager.ConnectionListener {
     }
 
     binding.btnConnect.setOnClickListener {
+      clearStatus()
       val selectedPosition = deviceListView.checkedItemPosition
       if (selectedPosition != ListView.INVALID_POSITION && selectedPosition < deviceList.size) {
         selectedDevice = deviceList[selectedPosition]
@@ -137,7 +140,12 @@ class MainActivity : AppCompatActivity(), WifiDirectManager.ConnectionListener {
     }
   }
 
+  // 回调：连接失败，三次重试，给予连接一定时间
   override fun onConnectionFailed() {
+    connectTryCount++;
+    if (connectTryCount < 3) {
+      return
+    }
     runOnUiThread { appendStatus("\n连接失败") }
   }
 

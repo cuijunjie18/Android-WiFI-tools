@@ -40,15 +40,24 @@ class WifiDirectManager(
           }
         }
         WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION -> {
-          val info = intent.getParcelableExtra<WifiP2pInfo>(WifiP2pManager.EXTRA_WIFI_P2P_INFO)
-          if (info != null && info.groupFormed) {
-            if (info.isGroupOwner) {
-              Log.d(TAG, "连接成功：我是 GO")
-            } else {
-              Log.d(TAG, "连接成功：我是 Client, GO IP = ${info.groupOwnerAddress?.hostAddress}")
+          var failFlag = false
+          manager.requestConnectionInfo(channel) { info ->
+            if (info.groupFormed) {
+              manager.requestGroupInfo(channel) { groupInfo ->
+                Log.d(TAG, "已连接到群组，群组名称：${groupInfo.networkName}")
+              }
+              if (info.isGroupOwner) {
+                Log.d(TAG, "连接成功：我是 GO，GO IP = ${info.groupOwnerAddress?.hostAddress}")
+              } else {
+                Log.d(TAG, "连接成功：我是 Client, GO IP = ${info.groupOwnerAddress?.hostAddress}")
+              }
               listener.onConnectionSuccess(info)
+            } else {
+              failFlag = true
+              Log.d(TAG, "未连接到任何群组")
             }
-          } else {
+          }
+          if (failFlag) {
             listener.onConnectionFailed()
           }
         }
@@ -86,8 +95,8 @@ class WifiDirectManager(
       deviceAddress = device.deviceAddress
       wps.setup = WpsInfo.PBC // 关键：使用 PBC 方式，对应 Linux 的 wpa_cli pbc
       // 如果使用 PIN 码：
-      // wps.setup = WpsInfo.KEYPAD
-      // wps.pin = "12345678"
+//       wps.setup = WpsInfo.KEYPAD
+//       wps.pin = "12345678"
     }
 
     manager.connect(channel, config, object : WifiP2pManager.ActionListener {
