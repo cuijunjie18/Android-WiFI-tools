@@ -5,9 +5,15 @@
     android:layout_height="match_parent">
 
     <Button
-        android:layout_marginTop="100dp"
-        android:id="@+id/button"
+        android:layout_marginTop="150dp"
+        android:id="@+id/createButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="创建group" />
+
+    <Button
+        android:id="@+id/closeButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="关闭group" />
 </LinearLayout>

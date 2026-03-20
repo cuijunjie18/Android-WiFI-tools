@@ -31,7 +31,8 @@ class MainActivity : AppCompatActivity() {
   private lateinit var channel: Channel
   private var broadcastReceiver: WiFiDirectBroadcastReceiver? = null
 
-  private lateinit var button: Button
+  private lateinit var createButton: Button
+  private lateinit var closeButton: Button
 
   private val permissionLauncher = registerForActivityResult(
     ActivityResultContracts.RequestMultiplePermissions()
@@ -74,9 +75,14 @@ class MainActivity : AppCompatActivity() {
 
   @RequiresApi(Build.VERSION_CODES.Q)
   private fun initController() {
-    button = findViewById(R.id.button)
-    button.setOnClickListener {
-      createGroup()
+    createButton = findViewById(R.id.createButton)
+    closeButton = findViewById(R.id.closeButton)
+    createButton.setOnClickListener {
+//      createGroup()
+      createGroup_wx()
+    }
+    closeButton.setOnClickListener {
+      removeGroup()
     }
     Log.d(TAG, "init Controller done")
   }
@@ -85,6 +91,8 @@ class MainActivity : AppCompatActivity() {
     val requiredPermissions = arrayOf(
       Manifest.permission.ACCESS_WIFI_STATE,
       Manifest.permission.CHANGE_WIFI_STATE,
+      Manifest.permission.CHANGE_NETWORK_STATE,
+      Manifest.permission.INTERNET,
       Manifest.permission.ACCESS_FINE_LOCATION,
       Manifest.permission.ACCESS_COARSE_LOCATION,
       Manifest.permission.NEARBY_WIFI_DEVICES
@@ -119,13 +127,38 @@ class MainActivity : AppCompatActivity() {
 
     val config = WifiP2pConfig.Builder()
       .setNetworkName("DIRECT-CJJ")
-      .setPassphrase("1234567890")
+      .setPassphrase("12345678")
       .build()
 
     // 移除旧群组
     removeGroup()
     wifiP2pManager.createGroup(channel, config, listener)
     Log.d(TAG, "create Group done")
+  }
+
+  @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.NEARBY_WIFI_DEVICES])
+  fun createGroup_wx() {
+    // 先移除现有群组
+    removeGroup()
+    // 创建新群组
+
+    val listener = object : WifiP2pManager.ActionListener {
+      override fun onSuccess() {
+        Log.i(TAG, "Create group success")
+      }
+      override fun onFailure(reason: Int) {
+        Log.e(TAG, "Failed to create group: $reason")
+      }
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      val config = WifiP2pConfig.Builder()
+        .setNetworkName("DIRECT-ABCD")
+        .setPassphrase("12345678")
+        .build()    // 这里只能用builder构建config，反射出来的系统不认
+      wifiP2pManager.createGroup(channel, config, listener)
+    } else {
+      wifiP2pManager.createGroup(channel, listener)
+    }
   }
 
   @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.NEARBY_WIFI_DEVICES])
@@ -137,10 +170,13 @@ class MainActivity : AppCompatActivity() {
           override fun onSuccess() { Log.d(TAG, "移除旧群组成功") }
           override fun onFailure(reason: Int) { Log.e(TAG, "移除旧群组失败") }
         })
+      } else {
+        Log.d(TAG, "没有群组，不需要移除")
       }
     }
   }
 
+  @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.NEARBY_WIFI_DEVICES])
   override fun onDestroy() {
     super.onDestroy()
     unregisterReceiver(broadcastReceiver)
