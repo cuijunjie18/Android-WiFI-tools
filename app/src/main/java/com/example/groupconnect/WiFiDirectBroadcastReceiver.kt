@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.net.wifi.WifiManager
 import android.net.wifi.p2p.WifiP2pManager
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresPermission
 import androidx.core.app.ActivityCompat
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -47,6 +48,13 @@ class WiFiDirectBroadcastReceiver(val wifiP2pManager: WifiP2pManager, val channe
             // 可进一步获取群组名称、密码等（通过 requestGroupInfo）
           } else {
             Log.d(TAG, "未连接到任何群组")
+          }
+        }
+        wifiP2pManager.requestGroupInfo(channel) { groupInfo ->
+          if (groupInfo != null) {
+            Log.d(TAG, "已连接到群组，群组名称：${groupInfo.networkName}")
+            Log.d(TAG, "已连接到群组，群组密码：${groupInfo.passphrase}")
+            Toast.makeText(context, "已连接到群组", Toast.LENGTH_SHORT).show()
           }
         }
       }

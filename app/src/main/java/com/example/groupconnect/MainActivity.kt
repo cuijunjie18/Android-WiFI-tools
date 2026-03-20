@@ -80,7 +80,8 @@ class MainActivity : AppCompatActivity() {
             Manifest.permission.ACCESS_WIFI_STATE,
             Manifest.permission.CHANGE_WIFI_STATE,
             Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.NEARBY_WIFI_DEVICES
         )
         
         val missingPermissions = requiredPermissions.filter {
@@ -123,13 +124,15 @@ class MainActivity : AppCompatActivity() {
         statusTextView.text = "正在连接..."
         connectButton.isEnabled = false
 
-        val deviceAddress: MacAddress = MacAddress.fromString("f4:ce:23:c9:32:96")
+        val device_address = MacAddress.fromString("02:00:00:00:00:00")
         val config = WifiP2pConfig.Builder()
-            .setDeviceAddress(deviceAddress)
+            .setDeviceAddress(device_address)
             .setNetworkName(networkName)
             .setPassphrase(passphrase)
             .build()
-        
+
+        config.wps.setup = WpsInfo.KEYPAD
+
         // 发起连接
         wifiP2pManager.connect(channel, config, object : WifiP2pManager.ActionListener {
             override fun onSuccess() {
@@ -148,15 +151,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
-
-        wifiP2pManager.requestConnectionInfo(channel) { info ->
-            if (info.groupFormed) {
-                Log.d(TAG, "已连接到群组，自己是${if (info.isGroupOwner) "群主" else "客户端"}")
-                // 可进一步获取群组名称、密码等（通过 requestGroupInfo）
-            } else {
-                Log.d(TAG, "未连接到任何群组")
-            }
-        }
     }
 
     override fun onDestroy() {

@@ -65,7 +65,7 @@
         android:id="@+id/statusTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="等待权限授权..."
+        android:text="等待连接..."
         android:textSize="14sp"
         android:padding="12dp"
         android:background="#f0f0f0"
