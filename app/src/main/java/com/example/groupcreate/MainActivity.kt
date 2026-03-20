@@ -10,6 +10,7 @@ import android.net.wifi.p2p.WifiP2pManager
 import android.net.wifi.p2p.WifiP2pManager.Channel
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
@@ -30,6 +31,7 @@ class MainActivity : AppCompatActivity() {
 
   private lateinit var channel: Channel
   private var broadcastReceiver: WiFiDirectBroadcastReceiver? = null
+  private lateinit var utils: Utils
 
   private lateinit var createButton: Button
   private lateinit var closeButton: Button
@@ -58,6 +60,7 @@ class MainActivity : AppCompatActivity() {
   private fun initWifiP2p() {
     wifiP2pManager = getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
     channel = wifiP2pManager.initialize(this, mainLooper, null)
+    utils = Utils(this)
     initBroadcastReceiver()
     Log.d(TAG, "init WifiP2p done")
   }
@@ -78,8 +81,7 @@ class MainActivity : AppCompatActivity() {
     createButton = findViewById(R.id.createButton)
     closeButton = findViewById(R.id.closeButton)
     createButton.setOnClickListener {
-//      createGroup()
-      createGroup_wx()
+      createGroup()
     }
     closeButton.setOnClickListener {
       removeGroup()
@@ -126,39 +128,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     val config = WifiP2pConfig.Builder()
-      .setNetworkName("DIRECT-CJJ")
-      .setPassphrase("12345678")
+      .setNetworkName("DIRECT-WX-" + utils.truncateByBytes(utils.getCurrentDeviceName(), 18) + "-" + utils.generateRandomString(3))
+      .setPassphrase(utils.generateRandomString(8))
       .build()
 
     // 移除旧群组
     removeGroup()
     wifiP2pManager.createGroup(channel, config, listener)
     Log.d(TAG, "create Group done")
-  }
-
-  @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.NEARBY_WIFI_DEVICES])
-  fun createGroup_wx() {
-    // 先移除现有群组
-    removeGroup()
-    // 创建新群组
-
-    val listener = object : WifiP2pManager.ActionListener {
-      override fun onSuccess() {
-        Log.i(TAG, "Create group success")
-      }
-      override fun onFailure(reason: Int) {
-        Log.e(TAG, "Failed to create group: $reason")
-      }
-    }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-      val config = WifiP2pConfig.Builder()
-        .setNetworkName("DIRECT-ABCD")
-        .setPassphrase("12345678")
-        .build()    // 这里只能用builder构建config，反射出来的系统不认
-      wifiP2pManager.createGroup(channel, config, listener)
-    } else {
-      wifiP2pManager.createGroup(channel, listener)
-    }
   }
 
   @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.NEARBY_WIFI_DEVICES])
