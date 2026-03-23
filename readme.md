@@ -12,3 +12,11 @@
 - [常规wifi连接](https://github.com/cuijunjie18/Android-WiFI-tools/tree/cjj/WifiNormalKotlin?tab=readme-ov-file)  
 - [Windows 官方Wifi Direct工具](https://github.com/microsoft/Windows-classic-samples/tree/main/Samples/WiFiDirectLegacyAP)  
 
+
+## 收货
+
+- 调试wifip2pManager相关api
+  在Android Studio中调试p2p相关的日志信息不够详细，可以在adb中使用下面命令
+  ```shell
+  logcat -s WifiP2PManager WifiP2PService WifiP2PNative WifiDirect wpa_supplicant
+  ```
