@@ -7,6 +7,7 @@ import android.net.wifi.p2p.WifiP2pDevice
 import android.net.wifi.p2p.WifiP2pInfo
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.Toast
@@ -32,6 +33,7 @@ class MainActivity : AppCompatActivity(), WifiDirectManager.ConnectionListener {
   private var selectedDevice: WifiP2pDevice? = null
 
   private var connectTryCount = 0
+  private var connectedGoIp: String? = null
 
   // 权限列表
   private val requiredPermissions: Array<String>
@@ -80,6 +82,12 @@ class MainActivity : AppCompatActivity(), WifiDirectManager.ConnectionListener {
       } else {
         Toast.makeText(this, "请先选择一个设备", Toast.LENGTH_SHORT).show()
       }
+    }
+
+    binding.btnTcpTest.setOnClickListener {
+      connectedGoIp?.let { ip ->
+        testTcpConnection(ip)
+      } ?: Toast.makeText(this, "尚未连接，请先连接设备", Toast.LENGTH_SHORT).show()
     }
 
     // 设备列表点击事件
@@ -133,10 +141,11 @@ class MainActivity : AppCompatActivity(), WifiDirectManager.ConnectionListener {
   // 回调：连接成功
   override fun onConnectionSuccess(info: WifiP2pInfo) {
     val goIp = info.groupOwnerAddress?.hostAddress ?: return
+    connectedGoIp = goIp
     runOnUiThread {
       appendStatus("\n连接成功！\nGO IP: $goIp")
-      // 启动协程进行 TCP 通信
-      testTcpConnection(goIp)
+      // 显示TCP测试按钮，等待用户点击
+      binding.btnTcpTest.visibility = View.VISIBLE
     }
   }
 
@@ -164,7 +173,7 @@ class MainActivity : AppCompatActivity(), WifiDirectManager.ConnectionListener {
     lifecycleScope.launch {
       appendStatus("\n正在尝试 TCP 通信...")
       val result = withContext(Dispatchers.IO) {
-        sendTcpMessage(hostIp, 8988, "Hello from Android Kotlin!")
+        sendTcpMessage(hostIp, 50001, "Hello from Android Kotlin!")
       }
       appendStatus("\n通信结果：$result")
     }
