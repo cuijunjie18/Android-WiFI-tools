@@ -5,12 +5,15 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.MacAddress
 import android.net.wifi.WpsInfo
 import android.net.wifi.p2p.WifiP2pConfig
 import android.net.wifi.p2p.WifiP2pDevice
 import android.net.wifi.p2p.WifiP2pInfo
 import android.net.wifi.p2p.WifiP2pManager
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 
 class WifiDirectManager(
@@ -89,15 +92,13 @@ class WifiDirectManager(
     })
   }
 
+  @RequiresApi(Build.VERSION_CODES.Q)
   @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.NEARBY_WIFI_DEVICES])
   fun connectToDevice(device: WifiP2pDevice) {
-    val config = WifiP2pConfig().apply {
-      deviceAddress = device.deviceAddress
-      wps.setup = WpsInfo.PBC // 关键：使用 PBC 方式，对应 Linux 的 wpa_cli pbc
-      // 如果使用 PIN 码：
-//       wps.setup = WpsInfo.KEYPAD
-//       wps.pin = "12345678"
-    }
+    val config = WifiP2pConfig.Builder()
+      .setDeviceAddress(MacAddress.fromString(device.deviceAddress))
+      .build()
+
 
     manager.connect(channel, config, object : WifiP2pManager.ActionListener {
       override fun onSuccess() { Log.d(TAG, "连接请求已发送") }
