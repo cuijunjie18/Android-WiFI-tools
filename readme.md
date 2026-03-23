@@ -6,10 +6,11 @@
 
 ## 工具集
 
-- [创建p2p组群](https://github.com/cuijunjie18/Android-WiFI-tools/tree/cjj/P2pGroupCreate)   
-- [networkName连接到p2p组群](https://github.com/cuijunjie18/Android-WiFI-tools/tree/cjj/P2pConnectGroup)  
-- [discover连接到p2p组群](https://github.com/cuijunjie18/Android-WiFI-tools/tree/cjj/P2pConnectGroupDiscover)   
-- [常规wifi连接](https://github.com/cuijunjie18/Android-WiFI-tools/tree/cjj/WifiNormalKotlin?tab=readme-ov-file)  
+- [Android 创建p2p组群](https://github.com/cuijunjie18/Android-WiFI-tools/tree/cjj/P2pGroupCreate)   
+- [Android networkName连接到p2p组群](https://github.com/cuijunjie18/Android-WiFI-tools/tree/cjj/P2pConnectGroup)  
+- [Android discover连接到p2p组群](https://github.com/cuijunjie18/Android-WiFI-tools/tree/cjj/P2pConnectGroupDiscover)   
+- [Android 常规wifi连接](https://github.com/cuijunjie18/Android-WiFI-tools/tree/cjj/WifiNormalKotlin?tab=readme-ov-file)  
+- [Windows Advertiser demo版](https://github.com/cuijunjie18/Android-WiFI-tools/tree/cjj/WindowsAdvertiser#)  
 - [Windows 官方Wifi Direct工具](https://github.com/microsoft/Windows-classic-samples/tree/main/Samples/WiFiDirectLegacyAP)  
 
 
