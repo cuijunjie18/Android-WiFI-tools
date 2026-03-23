@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="wifiDirectDemo.vcxproj" />
+  <Project Path="wifiDirectDemo.vcxproj" Id="1974ddc5-5fc3-4f1f-88cc-66f0f4572298" />
 </Solution>
