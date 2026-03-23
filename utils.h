@@ -17,8 +17,6 @@
 
 #include "pch.h"
 
-#pragma comment(lib, "ws2_32.lib")
-
 using namespace winrt;
 using namespace winrt::Windows::Networking::Sockets;
 using namespace winrt::Windows::Storage::Streams;
