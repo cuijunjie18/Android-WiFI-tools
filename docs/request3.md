@@ -1,0 +1,3 @@
+# 需求文档
+
+我已经完成了这个Android客户端基本功能的开发，核心逻辑是通过networkName与passphrase创建p2p group，且作为group owner。阅读整个项目，帮我写一个readme总结。
