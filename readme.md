@@ -2,7 +2,7 @@
 
 ## 背景
 
-一个我调试过程中Android端p2p的Wifi工具集
+开发过程中适用于不同平台的 wifi direct工具集.
 
 ## 工具集
 
@@ -14,7 +14,7 @@
 - [Windows 官方Wifi Direct工具](https://github.com/microsoft/Windows-classic-samples/tree/main/Samples/WiFiDirectLegacyAP)  
 
 
-## 收货
+## 收获
 
 - 调试wifip2pManager相关api
   在Android Studio中调试p2p相关的日志信息不够详细，可以在adb中使用下面命令
