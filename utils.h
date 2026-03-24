@@ -20,6 +20,7 @@
 using namespace winrt;
 using namespace winrt::Windows::Networking::Sockets;
 using namespace winrt::Windows::Storage::Streams;
+using namespace winrt::Windows::Networking::Connectivity;
 
 // Constants
 inline const std::array<uint8_t, 3> CustomOui = { 0xAA, 0xBB, 0xCC };
@@ -35,6 +36,16 @@ inline void LogMessage(const std::wstring& message, bool isError = false) {
     } else {
         std::wcout << L"[INFO]  " << message << std::endl;
     }
+}
+
+std::wstring GetLocalDeviceName() {
+    auto hostNames = NetworkInformation::GetHostNames();
+    for (auto const& name : hostNames) {
+		//std::wcout << L"HostName: " << name.DisplayName().c_str() << L", Type: " << static_cast<int>(name.Type()) << std::endl;
+        //return name.CanonicalName().c_str();
+		return name.DisplayName().c_str();
+    }
+    return L"";
 }
 
 // Represents a discovered Wi-Fi Direct device

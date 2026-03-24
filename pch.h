@@ -8,6 +8,7 @@
 #include <winrt/Windows.Networking.Sockets.h>
 #include <winrt/Windows.Storage.Streams.h>
 #include <winrt/Windows.Security.Credentials.h>
+#include <winrt/Windows.Networking.Connectivity.h>
 
 // Standard C++ headers
 #include <iostream>
