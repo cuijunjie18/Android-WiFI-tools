@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="16dp">
 
     <Button
         android:layout_marginTop="150dp"
@@ -16,4 +17,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="关闭group" />
+
+    <TextView
+        android:id="@+id/statusTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="等待操作..."
+        android:textSize="16sp"
+        android:textColor="#333333"
+        android:gravity="center" />
 </LinearLayout>

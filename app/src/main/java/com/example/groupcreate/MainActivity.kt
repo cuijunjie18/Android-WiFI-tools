@@ -1,29 +1,27 @@
 package com.example.groupcreate
 
 import android.Manifest
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.wifi.WpsInfo
 import android.net.wifi.p2p.WifiP2pConfig
+import android.net.wifi.p2p.WifiP2pDevice
 import android.net.wifi.p2p.WifiP2pManager
 import android.net.wifi.p2p.WifiP2pManager.Channel
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), WiFiDirectBroadcastReceiver.ConnectionListener {
   companion object {
     const val TAG = "CJJ_debug"
   }
@@ -35,6 +33,8 @@ class MainActivity : AppCompatActivity() {
 
   private lateinit var createButton: Button
   private lateinit var closeButton: Button
+  private lateinit var statusTextView: TextView
+  private var haveConnection = false
 
   private val permissionLauncher = registerForActivityResult(
     ActivityResultContracts.RequestMultiplePermissions()
@@ -72,7 +72,8 @@ class MainActivity : AppCompatActivity() {
         addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
         addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
       }
-      broadcastReceiver = WiFiDirectBroadcastReceiver(wifiP2pManager, channel)
+      // 传入this作为ConnectionListener
+      broadcastReceiver = WiFiDirectBroadcastReceiver(wifiP2pManager, channel, this)
       registerReceiver(broadcastReceiver, intentFilter)
   }
 
@@ -80,10 +81,12 @@ class MainActivity : AppCompatActivity() {
   private fun initController() {
     createButton = findViewById(R.id.createButton)
     closeButton = findViewById(R.id.closeButton)
+    statusTextView = findViewById(R.id.statusTextView)
     createButton.setOnClickListener {
       createGroup()
     }
     closeButton.setOnClickListener {
+      Toast.makeText(this, "正在关闭群组", Toast.LENGTH_SHORT).show()
       removeGroup()
     }
     Log.d(TAG, "init Controller done")
@@ -119,17 +122,19 @@ class MainActivity : AppCompatActivity() {
       override fun onSuccess() {
         Log.d(TAG, "create Group success")
         Toast.makeText(this@MainActivity, "创建群组成功", Toast.LENGTH_SHORT).show()
+        updateStatus("群组已创建，等待设备连接...")
       }
 
       override fun onFailure(reason: Int) {
         Log.e(TAG, "create Group fail: error code: $reason")
         Toast.makeText(this@MainActivity, "创建群组失败", Toast.LENGTH_SHORT).show()
+        updateStatus("创建群组失败")
       }
     }
 
     val config = WifiP2pConfig.Builder()
-      .setNetworkName("DIRECT-WX-" + utils.truncateByBytes(utils.getCurrentDeviceName(), 18) + "-" + utils.generateRandomString(3))
-      .setPassphrase(utils.generateRandomString(8))
+      .setNetworkName("DIRECT-123")
+      .setPassphrase("00000000")
       .build()
 
     // 移除旧群组
@@ -144,13 +149,64 @@ class MainActivity : AppCompatActivity() {
       if (group != null) {
         Log.d(TAG, "已有群组存在: ${group.networkName}, 正在移除...")
         wifiP2pManager.removeGroup(channel, object : WifiP2pManager.ActionListener {
-          override fun onSuccess() { Log.d(TAG, "移除旧群组成功") }
+          override fun onSuccess() {
+            Log.d(TAG, "移除旧群组成功")
+            Toast.makeText(this@MainActivity, "移除旧群组成功", Toast.LENGTH_SHORT).show()
+            updateStatus("群组已关闭")
+          }
           override fun onFailure(reason: Int) { Log.e(TAG, "移除旧群组失败") }
         })
       } else {
         Log.d(TAG, "没有群组，不需要移除")
       }
     }
+  }
+
+  /**
+   * 更新状态显示文本
+   */
+  private fun updateStatus(text: String) {
+    runOnUiThread {
+      statusTextView.text = text
+    }
+  }
+
+  // ==================== ConnectionListener 回调 ====================
+
+  override fun onDeviceConnected(deviceName: String, deviceAddress: String) {
+    Log.d(TAG, "设备已连接回调: $deviceName ($deviceAddress)")
+    val displayName = if (deviceName.isNotEmpty()) deviceName else deviceAddress
+    updateStatus("设备已连接: $displayName")
+    runOnUiThread {
+      Toast.makeText(this, "设备已连接: $displayName", Toast.LENGTH_SHORT).show()
+    }
+    haveConnection = true
+  }
+
+  override fun onDeviceDisconnected() {
+    Log.d(TAG, "设备断开连接回调")
+    updateStatus("设备已断开连接")
+    runOnUiThread {
+      Toast.makeText(this, "设备已断开连接", Toast.LENGTH_SHORT).show()
+    }
+    haveConnection = false
+  }
+
+  @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.NEARBY_WIFI_DEVICES])
+  override fun onDeviceFound(device: WifiP2pDevice) {
+    if (haveConnection) {
+      return
+    }
+    Log.d(TAG, "设备已找到回调: ${device.deviceName} (${device.deviceAddress})")
+    val config = WifiP2pConfig().apply {
+      deviceAddress = device.deviceAddress
+      wps.setup = WpsInfo.KEYPAD
+    }
+
+    wifiP2pManager.connect(channel, config, object : WifiP2pManager.ActionListener {
+      override fun onSuccess() { Log.d(TAG, "连接请求已发送") }
+      override fun onFailure(reason: Int) { Log.e(TAG, "连接请求失败：$reason") }
+    })
   }
 
   @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.NEARBY_WIFI_DEVICES])
