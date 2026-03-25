@@ -11,7 +11,7 @@
 - [Android discover连接到p2p组群](https://github.com/cuijunjie18/Android-WiFI-tools/tree/cjj/P2pConnectGroupDiscover)   
 - [Android 常规wifi连接](https://github.com/cuijunjie18/Android-WiFI-tools/tree/cjj/WifiNormalKotlin?tab=readme-ov-file)  
 - [Windows Advertiser demo版](https://github.com/cuijunjie18/Android-WiFI-tools/tree/cjj/WindowsAdvertiser#)  
-- [Windows 官方Wifi Direct工具](https://github.com/microsoft/Windows-classic-samples/tree/main/Samples/WiFiDirectLegacyAP)  
+- [Windows官方Wifi Direct Sample](https://github.com/microsoft/Windows-universal-samples/tree/main/Samples/WiFiDirect)    
 
 
 ## 收获
@@ -21,3 +21,6 @@
   ```shell
   logcat -s WifiP2PManager WifiP2PService WifiP2PNative WifiDirect wpa_supplicant
   ```
+
+## 参考
+[1] Windows Wi-Fi Direct官方文档: https://learn.microsoft.com/en-us/uwp/api/windows.devices.wifidirect?view=winrt-26100&redirectedfrom=MSDN
