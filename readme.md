@@ -10,7 +10,7 @@
 - [Android networkName连接到p2p组群](https://github.com/cuijunjie18/Android-WiFI-tools/tree/cjj/P2pConnectGroup)  
 - [Android discover连接到p2p组群](https://github.com/cuijunjie18/Android-WiFI-tools/tree/cjj/P2pConnectGroupDiscover)   
 - [Android 常规wifi连接](https://github.com/cuijunjie18/Android-WiFI-tools/tree/cjj/WifiNormalKotlin?tab=readme-ov-file)  
-- [Windows Advertiser demo版](https://github.com/cuijunjie18/Android-WiFI-tools/tree/cjj/WindowsAdvertiser#)  
+- [Windows Advertiser(兼容Wi-Fi Direct与非Wi-Fi Direct设备)](https://github.com/cuijunjie18/Android-WiFI-tools/tree/cjj/WindowsAdvertiser#)  
 - [Windows官方Wifi Direct Sample](https://github.com/microsoft/Windows-universal-samples/tree/main/Samples/WiFiDirect)    
 
 
@@ -24,3 +24,4 @@
 
 ## 参考
 [1] Windows Wi-Fi Direct官方文档: https://learn.microsoft.com/en-us/uwp/api/windows.devices.wifidirect?view=winrt-26100&redirectedfrom=MSDN
+[2] Android P2P api文档：https://developer.android.com/develop/connectivity/wifi/wifip2p?hl=zh-cn  
