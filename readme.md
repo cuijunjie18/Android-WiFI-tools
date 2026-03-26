@@ -23,5 +23,6 @@
   ```
 
 ## 参考
-[1] Windows Wi-Fi Direct官方文档: https://learn.microsoft.com/en-us/uwp/api/windows.devices.wifidirect?view=winrt-26100&redirectedfrom=MSDN
+[1] Windows Wi-Fi Direct官方文档: https://learn.microsoft.com/en-us/uwp/api/windows.devices.wifidirect?view=winrt-26100&redirectedfrom=MSDN  
+
 [2] Android P2P api文档：https://developer.android.com/develop/connectivity/wifi/wifip2p?hl=zh-cn  
